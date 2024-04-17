@@ -1,0 +1,25 @@
+{
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "settings": {
+    "[python]": {
+      "editor.formatOnSave": true,
+      "editor.defaultFormatter": "charliermarsh.ruff",
+      "editor.codeActionsOnSave": {
+        "source.organizeImports.ruff": "explicit"
+      },
+    },
+    "python.analysis.ignore": [
+      "*"
+    ],
+    "files.exclude": {
+      ".venv": true,
+      ".vscode": true,
+      "**/__pycache__": true,
+      ".pytest_cache": true,
+    },
+  }
+}

@@ -1,4 +1,10 @@
-__all__ = ['IntegreSQLError', 'TemplateAlreadyInitialized', 'ManagerNotReady', 'TemplateNotFound', 'DatabaseDiscarded']
+__all__ = [
+    "DatabaseDiscarded",
+    "IntegreSQLError",
+    "ManagerNotReady",
+    "TemplateAlreadyInitialized",
+    "TemplateNotFound",
+]
 
 
 class IntegreSQLError(Exception):

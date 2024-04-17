@@ -138,7 +138,7 @@ class Template:
         self.dbinfo = None
 
     def initialize(self) -> 'Template':
-        rsp = self.integresql.request('POST', '/templates', payload={"hash": str(self.integresql.tpl_hash)})
+        rsp = self.integresql.request('POST', '/templates', payload={'hash': str(self.integresql.tpl_hash)})
         if rsp.status_code == http.client.OK:
             self.dbinfo = DBInfo(rsp.json())
             return self

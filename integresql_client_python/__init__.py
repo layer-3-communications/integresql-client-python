@@ -237,7 +237,7 @@ class IntegreSQL:
     ) -> requests.Response:
         path = path.lstrip('/')
         url = f"{self.base_url}/{self.api_version}/{path}"
-        headers = {"Content-Type", "application/json"}
+        headers = {"content-type": "application/json"}
 
         if self.debug:
             print(f"Request {method.upper()} to {url} with qs {qs} and headers {headers} and data {payload}", file=sys.stderr)

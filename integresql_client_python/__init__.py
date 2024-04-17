@@ -113,6 +113,32 @@ class Database:
                 f"Received unexpected HTTP status {rsp.status_code}"
             )
 
+    def close(self, db_id: Union[int, DBInfo]) -> NoReturn:
+        if isinstance(db_id, DBInfo):
+            db_id = db_id.db_id
+
+        if db_id is None:
+            raise errors.IntegreSQLError("Invalid database id")
+
+        rsp = self.integresql.request(
+            "POST", f"/templates/{self.integresql.tpl_hash}/tests/{db_id}/unlock"
+        )
+        if rsp.status_code == http.client.NO_CONTENT:
+            return
+
+        if rsp.status_code == http.client.NOT_FOUND:
+            raise errors.NotFound(rsp.text)
+        elif rsp.status_code == http.client.BAD_REQUEST:
+            raise errors.BadDatabaseID()
+        elif rsp.status_code == http.client.SERVICE_UNAVAILABLE:
+            raise errors.ManagerNotReady()
+        elif rsp.status_code == http.client.LOCKED:
+            raise errors.DatabaseInUse()
+        else:
+            raise errors.IntegreSQLError(
+                f"Received unexpected HTTP status {rsp.status_code}"
+            )
+
     def mark_unmodified(self, db_id: Union[int, DBInfo]) -> NoReturn:
         if isinstance(db_id, DBInfo):
             db_id = db_id.db_id
@@ -139,8 +165,8 @@ class Database:
         self.dbinfo = self.open()
         return self.dbinfo
 
-    def __exit__(self, exc_type, exc_val, exc_tb):  # noqa
-        pass
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close(self.dbinfo.db_id)
 
 
 class Template:

@@ -2,6 +2,7 @@ __all__ = ['IntegreSQL', 'DBInfo', 'Database', 'Template']
 
 import hashlib
 import http.client
+import json
 import os
 import pathlib
 import sys
@@ -137,7 +138,7 @@ class Template:
         self.dbinfo = None
 
     def initialize(self) -> 'Template':
-        rsp = self.integresql.request('POST', '/templates', payload={'hash': str(self.integresql.tpl_hash)})
+        rsp = self.integresql.request('POST', '/templates', payload={"hash": str(self.integresql.tpl_hash)})
         if rsp.status_code == http.client.OK:
             self.dbinfo = DBInfo(rsp.json())
             return self
@@ -238,11 +239,12 @@ class IntegreSQL:
         path = path.lstrip('/')
         url = f"{self.base_url}/{self.api_version}/{path}"
         headers = {"content-type": "application/json"}
+        json_payload = json.dumps(payload)
 
         if self.debug:
-            print(f"Request {method.upper()} to {url} with qs {qs} and headers {headers} and data {payload}", file=sys.stderr)
+            print(f"Request {method.upper()} to {url} with qs {qs} and headers {headers} and data {json_payload}", file=sys.stderr)
 
-        rsp = self.connection.request(method, url, qs, payload, headers = headers)
+        rsp = self.connection.request(method, url, qs, json_payload, headers = headers)
 
         if self.debug:
             print(f"Response from {method.upper()} {url}: [{rsp.status_code}] {rsp.content}", file=sys.stderr)

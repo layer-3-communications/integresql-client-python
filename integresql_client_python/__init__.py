@@ -244,7 +244,7 @@ class IntegreSQL:
         if self.debug:
             print(f"Request {method.upper()} to {url} with qs {qs} and headers {headers} and data {json_payload}", file=sys.stderr)
 
-        rsp = self.connection.request(method, url, qs, json_payload, headers = headers)
+        rsp = self.connection.request(method, url, qs, json_payload, headers=headers)
 
         if self.debug:
             print(f"Response from {method.upper()} {url}: [{rsp.status_code}] {rsp.content}", file=sys.stderr)

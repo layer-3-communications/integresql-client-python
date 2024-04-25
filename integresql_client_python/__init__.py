@@ -97,28 +97,46 @@ class Database:
         self.integresql = integresql
         self.dbinfo = None
 
-    def open(self) -> DBInfo:
-        logger.debug(f"Database: open: {self.dbinfo}")
+    def destroy(self, db_id: Union[int, DBInfo]) -> NoReturn:
+        """
+        Release the database back to the pool so it can be reused.
+        The database will be recreated to the template image.
+        """
+
+        logger.debug(f"Database: destroy: {self.dbinfo}")
+
+        if isinstance(db_id, DBInfo):
+            db_id = db_id.db_id
+
+        if db_id is None:
+            raise errors.IntegreSQLError("Invalid database id")
 
         rsp = self.integresql.request(
-            "GET", f"/templates/{self.integresql.tpl_hash}/tests"
+            "POST", f"/templates/{self.integresql.tpl_hash}/tests/{db_id}/recreate"
         )
-        if rsp.status_code == http.client.OK:
-            return DBInfo(rsp.json())
+        if rsp.status_code == http.client.NO_CONTENT:
+            return
 
         if rsp.status_code == http.client.NOT_FOUND:
-            raise errors.TemplateNotFound()
-        elif rsp.status_code == http.client.GONE:
-            raise errors.DatabaseDiscarded()
+            raise errors.NotFound(rsp.text)
+        elif rsp.status_code == http.client.BAD_REQUEST:
+            raise errors.BadDatabaseID()
         elif rsp.status_code == http.client.SERVICE_UNAVAILABLE:
             raise errors.ManagerNotReady()
+        elif rsp.status_code == http.client.LOCKED:
+            raise errors.DatabaseInUse()
         else:
             raise errors.IntegreSQLError(
                 f"Received unexpected HTTP status {rsp.status_code}"
             )
 
-    def close(self, db_id: Union[int, DBInfo]) -> NoReturn:
-        logger.debug(f"Database: close: {self.dbinfo}")
+    def free(self, db_id: Union[int, DBInfo]) -> NoReturn:
+        """
+        Release the database back to the pool so it can be reused.
+        The database retains its current state.
+        """
+
+        logger.debug(f"Database: free: {self.dbinfo}")
 
         if isinstance(db_id, DBInfo):
             db_id = db_id.db_id
@@ -140,6 +158,26 @@ class Database:
             raise errors.ManagerNotReady()
         elif rsp.status_code == http.client.LOCKED:
             raise errors.DatabaseInUse()
+        else:
+            raise errors.IntegreSQLError(
+                f"Received unexpected HTTP status {rsp.status_code}"
+            )
+
+    def open(self) -> DBInfo:
+        logger.debug(f"Database: open: {self.dbinfo}")
+
+        rsp = self.integresql.request(
+            "GET", f"/templates/{self.integresql.tpl_hash}/tests"
+        )
+        if rsp.status_code == http.client.OK:
+            return DBInfo(rsp.json())
+
+        if rsp.status_code == http.client.NOT_FOUND:
+            raise errors.TemplateNotFound()
+        elif rsp.status_code == http.client.GONE:
+            raise errors.DatabaseDiscarded()
+        elif rsp.status_code == http.client.SERVICE_UNAVAILABLE:
+            raise errors.ManagerNotReady()
         else:
             raise errors.IntegreSQLError(
                 f"Received unexpected HTTP status {rsp.status_code}"
@@ -178,7 +216,7 @@ class Database:
     def __exit__(self, exc_type, exc_val, exc_tb):
         logger.debug(f"Database: __exit__: {self.dbinfo}")
 
-        self.close(self.dbinfo.db_id)
+        self.destroy(self.dbinfo.db_id)
 
 
 class Template:

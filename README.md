@@ -13,7 +13,7 @@ Python client for [IntegreSQL](https://github.com/allaboutapps/integresql).
 Current stable version
 ----------------------
 
-0.9.2
+0.9.3
 
 Python version
 --------------
@@ -73,6 +73,14 @@ If you find a bug or have an idea to enhance this tool, please use GitHub's
 
 ChangeLog
 ---------
+### v0.9.3
+
+* Changed database behavior so that Integresql will always recreate a database after use.
+* Added logger and debugging statements.
+* Added close method to Database and new exception types.
+* Reformatted code, added vscode files, and updated readme.
+* Added proper content type and encoding to requests.
+
 ### v0.9.2
 
 * fixed a bug where test database was returned to pool after every test and got reused.

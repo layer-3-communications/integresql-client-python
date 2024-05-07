@@ -14,7 +14,7 @@ from . import errors
 
 logger = logging.getLogger("integresql-client-python")
 
-__version__ = "0.9.2"
+__version__ = "0.9.3"
 ENV_INTEGRESQL_CLIENT_BASE_URL = "INTEGRESQL_CLIENT_BASE_URL"
 ENV_INTEGRESQL_CLIENT_API_VERSION = "INTEGRESQL_CLIENT_API_VERSION"
 DEFAULT_CLIENT_BASE_URL = "http://integresql:5000/api"
